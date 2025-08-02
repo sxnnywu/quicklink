@@ -27,12 +27,12 @@ app.post('/api/shorturl', (req, res) => {
     const { url } = req.body;
 
     // if no url, return error
-    if (!url) return res.status(400).json({ error: 'Invalid URL' });
+    if (!url) return res.status(400).json({ error: 'invalid URL' });
 
     // validate url format
     const urlRegex = /^(https?:\/\/)([\w-]+\.)+[\w-]+(\/[\w-.~:?#[\]@!$&'()*+,;=]*)?$/i;
     if (!urlRegex.test(url)) {
-        return res.status(400).json({ error: 'Invalid URL' });
+        return res.status(400).json({ error: 'invalid URL' });
     }
 
     // parse url to get hostname
@@ -40,7 +40,7 @@ app.post('/api/shorturl', (req, res) => {
 
     // validate url hostname
     dns.lookup(hostname, (err) => {
-        if(err) return res.status(400).json({ error: 'Invalid URL' });
+        if(err) return res.status(400).json({ error: 'invalid URL' });
 
         // generate short url
         const shortUrl = generateShortUrl();
