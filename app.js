@@ -27,7 +27,7 @@ app.post('/api/shorturl', (req, res) => {
     const { url } = req.body;
 
     // if no url, return error
-    if (!url) return res.status(400).json({ error: 'URL is required' });
+    if (!url) return res.status(400).json({ error: 'Invalid URL' });
 
     // validate url format
     const urlRegex = /^(https?:\/\/)([\w-]+\.)+[\w-]+(\/[\w-.~:?#[\]@!$&'()*+,;=]*)?$/i;
