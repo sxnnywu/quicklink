@@ -35,26 +35,30 @@ app.post('/api/shorturl', (req, res) => {
         return res.status(400).json({ error: 'invalid url' });
     }
 
-    // parse url to get hostname
-    const hostname = urlParser.parse(url).hostname;
+    try{
+        // parse url to get hostname
+        const hostname = urlParser.parse(url).hostname;
 
-    // validate url hostname
-    dns.lookup(hostname, (err) => {
-        if(err) return res.status(400).json({ error: 'invalid url' });
+        // validate url hostname
+        dns.lookup(hostname, (err) => {
+            if(err) return res.status(400).json({ error: 'invalid url' });
 
-        // generate short url
-        const shortUrl = generateShortUrl();
+            // generate short url
+            const shortUrl = generateShortUrl();
 
-        // map short url to original url
-        app.locals.urls = app.locals.urls || {};
-        app.locals.urls[shortUrl] = url;
+            // map short url to original url
+            app.locals.urls = app.locals.urls || {};
+            app.locals.urls[shortUrl] = url;
 
-        // return json response with both urls
-        res.json({
-            original_url: url,
-            short_url: shortUrl
+            // return json response with both urls
+            res.json({
+                original_url: url,
+                short_url: shortUrl
+            });
         });
-    });
+    } catch {
+        return res.status(400).json({ error: 'invalid url' });
+    }
 });
 
 // generate short url
