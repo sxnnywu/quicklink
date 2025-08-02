@@ -29,11 +29,17 @@ app.post('/api/shorturl', (req, res) => {
     // if no url, return error
     if (!url) return res.status(400).json({ error: 'URL is required' });
 
+    // validate url format
+    const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/?$/;
+    if (!urlRegex.test(url)) {
+        return res.status(400).json({ error: 'Invalid URL format' });
+    }
+
     // parse url to get hostname
     const hostname = urlParser.parse(url).hostname;
 
-    // validate url
-    dns.lookup(hostname, (err, address) => {
+    // validate url hostname
+    dns.lookup(hostname, (err) => {
         if(err) return res.status(400).json({ error: 'Invalid URL' });
 
         // generate short url
