@@ -32,7 +32,7 @@ app.post('/api/shorturl', (req, res) => {
     // validate url format
     const urlRegex = /^(https?:\/\/)([\w-]+\.)+[\w-]+(\/[\w-.~:?#[\]@!$&'()*+,;=]*)?$/i;
     if (!urlRegex.test(url)) {
-        return res.status(400).json({ error: 'Invalid URL format' });
+        return res.status(400).json({ error: 'Invalid URL' });
     }
 
     // parse url to get hostname
