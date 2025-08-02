@@ -25,13 +25,18 @@ app.post('/api/shorturl', (req, res) => {
   
     // get url from query
     const { url } = req.body;
+    console.log(`Received URL: ${url}`);
 
     // if no url, return error
     if (!url) return res.status(400).json({ error: 'invalid url' });
+    if (!url) console.log('No URL provided');
 
     try{
         // parse url to get hostname
         const hostname = urlParser.parse(url).hostname;
+        console.log(`Parsed hostname: ${hostname}`);
+
+        if(!hostname) return res.status(400).json({ error: 'invalid url' });
 
         // validate url hostname
         dns.lookup(hostname, (err) => {
