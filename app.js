@@ -29,12 +29,6 @@ app.post('/api/shorturl', (req, res) => {
     // if no url, return error
     if (!url) return res.status(400).json({ error: 'invalid url' });
 
-    // validate url format
-    const urlRegex = /^(https?:\/\/)([\w-]+\.)+[\w-]+(\/[\w-.~:?#[\]@!$&'()*+,;=]*)?$/i;
-    if (!urlRegex.test(url)) {
-        return res.status(400).json({ error: 'invalid url' });
-    }
-
     try{
         // parse url to get hostname
         const hostname = urlParser.parse(url).hostname;
