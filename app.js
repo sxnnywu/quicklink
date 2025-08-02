@@ -12,15 +12,13 @@ app.get('/', (req, res) => {
 });
 
 // short url endpoint
-app.get('/api/shorturl', (req, res) => {
+app.post('/api/shorturl', (req, res) => {
   
     // get url from query
-    const url = req.query.url;
+    const { url } = red.body;
 
     // if no url, return error
-    if (!url) {
-        return res.status(400).json({ error: 'URL is required' });
-    }
+    if (!url) return res.status(400).json({ error: 'URL is required' });
 
     // validate url
     const urlRegex = /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)(:\d+)?(\/.*)?$/;
@@ -43,7 +41,7 @@ app.get('/api/shorturl', (req, res) => {
 });
 
 // redirect endpoint
-app.get('/api/shorturl/:shortUrl', (req, res) => {
+app.get('/api/shorturl/:shortUrl', express.json(), (req, res) => {
     // get short url from params
     const shortUrl = req.params.shortUrl; 
 
