@@ -39,6 +39,11 @@ app.post('/api/shorturl', (req, res) => {
         const parsedUrl = new URL(url);
         const hostname = parsedUrl.hostname;
 
+        // reject unsupported protocols immediately
+        if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+            return res.status(400).json({ error: "invalid url" });
+        }
+
         if(!hostname) return res.status(400).json({ error: 'invalid url' });
 
         // validate url hostname
