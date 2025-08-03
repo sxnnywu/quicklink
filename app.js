@@ -10,6 +10,11 @@ app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
+app.use((req, res, next) => {
+    console.log(`${req.method} request for '${req.url}'`);
+    next();
+})
+
 // import required modules to validate URLs
 const dns = require('dns');
 const urlParser = require('url');
@@ -23,27 +28,21 @@ app.get('/', (req, res) => {
 // short url endpoint
 app.post('/api/shorturl', (req, res) => {
 
-    console.log('Received request to create short URL');
-  
     // get url from query
     const { url } = req.body;
-    console.log(`Received URL: ${url}`);
 
     // if no url, return error
-    if (!url) console.log('No URL provided');
     if (!url) return res.status(400).json({ error: 'invalid url' });
 
     try{
         // parse url to get hostname
-        const hostname = urlParser.parse(url).hostname;
-        console.log(`Parsed hostname: ${hostname}`);
+        const parsedUrl = new URL(url);
+        const hostname = parsedUrl.hostname;
 
-        if (!hostname) console.log('No hostname found in URL');
         if(!hostname) return res.status(400).json({ error: 'invalid url' });
 
         // validate url hostname
         dns.lookup(hostname, (err) => {
-            if(err) console.log(`DNS lookup error: ${err.message}`);
             if(err) return res.status(400).json({ error: 'invalid url' });
 
             // generate short url
@@ -53,8 +52,6 @@ app.post('/api/shorturl', (req, res) => {
             app.locals.urls = app.locals.urls || {};
             app.locals.urls[shortUrl] = url;
 
-            console.log(`Short URL generated: ${shortUrl} --> ${url}`);
-
             // return json response with both urls
             res.json({
                 original_url: url,
@@ -62,7 +59,6 @@ app.post('/api/shorturl', (req, res) => {
             });
         });
     } catch (e) {
-        console.log('Catch block triggered:', e.message);
         return res.status(400).json({ error: 'invalid url' });
     }
 });
