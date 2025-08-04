@@ -1,54 +1,66 @@
 // create express app
-const express = require('express');
+const express = require("express");
 const app = express();
 
 // enable cors
-const cors = require('cors');
+const cors = require("cors");
 app.use(cors());
 
 // middleware to parse JSON
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-app.use((req, res, next) => {
-    console.log(`${req.method} request for '${req.url}'`);
-    next();
-})
-
 // import required modules to validate URLs
-const dns = require('dns');
-const urlParser = require('url');
-const { error } = require('console');
+const dns = require("dns");
+const urlParser = require("url");
+const { error } = require("console");
 
 // root endpoint
-app.get('/', (req, res) => {
-  res.send('Welcome to QuickLink!');
+app.get("/", (req, res) => {
+    res.send("Welcome to QuickLink!");
 });
 
 // short url endpoint
-app.post('/api/shorturl', (req, res) => {
+app.post("/api/shorturl", (req, res) => {
+    console.log("Received request to create short URL");
 
     // get url from query
     const { url } = req.body;
+    console.log(`Received URL: ${url}`);
 
     // if no url, return error
-    if (!url) return res.status(400).json({ error: 'invalid url' });
+    if (!url) console.log("No URL provided");
+    if (!url) return res.status(400).json({ error: "invalid url" });
 
-    try{
-        // parse url to get hostname
-        const parsedUrl = new URL(url);
-        const hostname = parsedUrl.hostname;
+    try {
+        // parse url
+        let parsedUrl;
+        try {
+            parsedUrl = new URL(url);
+        } catch (e) {
+            console.log("Invalid URL format");
+            return res.status(400).json({ error: "invalid url" });
+        }
+        console.log(`Parsed URL: ${parsedUrl}`);
 
-        // reject unsupported protocols immediately
+        // Validate protocol
         if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+            console.log("Unsupported protocol");
             return res.status(400).json({ error: "invalid url" });
         }
 
-        if(!hostname) return res.status(400).json({ error: 'invalid url' });
+        // get hostname
+        const hostname = parsedUrl.hostname;
+        console.log(`Parsed hostname: ${hostname}`);
+
+        if (!hostname) console.log("No hostname found in URL");
+        if (!hostname) return res.status(400).json({ error: "invalid url" });
 
         // validate url hostname
+        console.log("About to perform DNS lookup");
         dns.lookup(hostname, (err) => {
-            if(err) return res.status(400).json({ error: 'invalid url' });
+            if (err) console.log(`DNS lookup error: ${err.message}`);
+            if (err) return res.status(400).json({ error: "invalid url" });
 
             // generate short url
             const shortUrl = generateShortUrl();
@@ -57,22 +69,24 @@ app.post('/api/shorturl', (req, res) => {
             app.locals.urls = app.locals.urls || {};
             app.locals.urls[shortUrl] = url;
 
+            console.log(`Short URL generated: ${shortUrl} --> ${url}`);
+
             // return json response with both urls
             res.json({
                 original_url: url,
-                short_url: shortUrl
+                short_url: shortUrl,
             });
         });
     } catch (e) {
-        return res.status(400).json({ error: 'invalid url' });
+        console.log("Catch block triggered:", e.message);
+        return res.status(400).json({ error: "invalid url" });
     }
 });
 
 // generate short url
 function generateShortUrl() {
-
     let shortUrl;
-    do{
+    do {
         shortUrl = Math.floor(Math.random() * 1000000).toString();
     } while (app.locals.urls && app.locals.urls[shortUrl]);
 
@@ -80,13 +94,13 @@ function generateShortUrl() {
 }
 
 // redirect endpoint
-app.get('/api/shorturl/:shortUrl', (req, res) => {
+app.get("/api/shorturl/:shortUrl", (req, res) => {
     // get short url from params
-    const shortUrl = req.params.shortUrl; 
+    const shortUrl = req.params.shortUrl;
 
     // if short url not found, return error
     if (!app.locals.urls || !app.locals.urls[shortUrl]) {
-        return res.status(404).json({ error: 'Short URL not found' });
+        return res.status(404).json({ error: "Short URL not found" });
     }
 
     // redirect to original url
