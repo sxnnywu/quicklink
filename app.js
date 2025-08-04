@@ -22,14 +22,11 @@ app.get("/", (req, res) => {
 
 // short url endpoint
 app.post("/api/shorturl", (req, res) => {
-    console.log("Received request to create short URL");
 
     // get url from query
     const { url } = req.body;
-    console.log(`Received URL: ${url}`);
 
     // if no url, return error
-    if (!url) console.log("No URL provided");
     if (!url) return res.status(400).json({ error: "invalid url" });
 
     try {
@@ -38,28 +35,19 @@ app.post("/api/shorturl", (req, res) => {
         try {
             parsedUrl = new URL(url);
         } catch (e) {
-            console.log("Invalid URL format");
             return res.status(400).json({ error: "invalid url" });
         }
-        console.log(`Parsed URL: ${parsedUrl}`);
 
         // Validate protocol
-        if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
-            console.log("Unsupported protocol");
+        if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") 
             return res.json({ error: "invalid url" });
-        }
 
         // get hostname
         const hostname = parsedUrl.hostname;
-        console.log(`Parsed hostname: ${hostname}`);
-
-        if (!hostname) console.log("No hostname found in URL");
         if (!hostname) return res.status(400).json({ error: "invalid url" });
 
         // validate url hostname
-        console.log("About to perform DNS lookup");
         dns.lookup(hostname, (err) => {
-            if (err) console.log(`DNS lookup error: ${err.message}`);
             if (err) return res.status(400).json({ error: "invalid url" });
 
             // generate short url
@@ -69,8 +57,6 @@ app.post("/api/shorturl", (req, res) => {
             app.locals.urls = app.locals.urls || {};
             app.locals.urls[shortUrl] = url;
 
-            console.log(`Short URL generated: ${shortUrl} --> ${url}`);
-
             // return json response with both urls
             res.json({
                 original_url: url,
@@ -78,7 +64,6 @@ app.post("/api/shorturl", (req, res) => {
             });
         });
     } catch (e) {
-        console.log("Catch block triggered:", e.message);
         return res.status(400).json({ error: "invalid url" });
     }
 });
